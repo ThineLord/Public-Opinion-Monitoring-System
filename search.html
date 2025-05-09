@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>舆情监测系统</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f9; /* 浅灰色背景 */
+            color: #333; /* 默认文字颜色 */
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 顶部区域 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 2px solid #e0e0e0; /* 浅灰色分割线 */
+        }
+
+        .current-time {
+            font-size: 1em;
+            color: #555;
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+        }
+
+        .theme-switcher label {
+            margin-right: 8px;
+            font-size: 0.9em;
+        }
+
+        /* 输入区域 */
+        .search-section {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #fff; /* 白色背景 */
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .search-section input[type="text"] {
+            width: calc(100% - 120px); /* 减去按钮宽度和间距 */
+            padding: 12px 15px;
+            font-size: 1.1em;
+            border: 1px solid #ccc;
+            border-radius: 6px 0 0 6px; /* 左侧圆角 */
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+
+        .search-section input[type="text"]:focus {
+            border-color: #007bff; /* 蓝色焦点边框 */
+            outline: none;
+        }
+
+        .search-section button {
+            width: 100px;
+            padding: 12px 15px;
+            font-size: 1.1em;
+            background-color: #007bff; /* 主要蓝色 */
+            color: white;
+            border: none;
+            border-radius: 0 6px 6px 0; /* 右侧圆角 */
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .search-section button:hover {
+            background-color: #0056b3; /* 深蓝色悬停 */
+        }
+
+        /* 信息展示区域 */
+        .info-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* 两列布局 */
+            gap: 25px;
+        }
+
+        .info-column {
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .info-column h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-column .news-item { /* 新闻条目样式 */
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .info-column .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-column .news-item-title {
+            font-weight: bold;
+            color: #007bff; /* 蓝色链接 */
+            text-decoration: none;
+        }
+        .info-column .news-item-title:hover {
+            text-decoration: underline;
+        }
+
+        .info-column .news-item-source {
+            font-size: 0.85em;
+            color: #777;
+            margin-top: 5px;
+        }
+
+
+        /* 舆情分析区域 */
+        .analysis-section {
+            margin-top: 30px;
+            padding: 25px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            text-align: center; /* 居中显示 */
+        }
+
+        .analysis-section h2 {
+            margin-top: 0;
+            font-size: 1.5em;
+            color: #333;
+        }
+
+        .sentiment-percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #007bff; /* 蓝色百分比 */
+        }
+
+        .sentiment-percentage .positive {
+            color: #28a745; /* 绿色表示积极 */
+        }
+
+        .sentiment-percentage .negative {
+            color: #dc3545; /* 红色表示消极，但主线条是红色，这里用另一种红 */
+        }
+
+
+        .suggestions {
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #555;
+            text-align: left; /* 建议左对齐 */
+            padding: 15px;
+            background-color: #e9f7ff; /* 淡蓝色背景 */
+            border-left: 5px solid #007bff; /* 蓝色左边框 */
+            border-radius: 4px;
+        }
+
+        /* 强调线条 - 红色 */
+        .header, .info-column h2, .analysis-section h2 {
+            /* 主要线条颜色已经通过 border-bottom 设置或在特定元素上通过 color 设置 */
+        }
+
+        /* 强调色块 - 蓝色 */
+        .search-section button, .sentiment-percentage, .suggestions {
+            /* 主要色块颜色已经通过 background-color 或 color 设置 */
+        }
+        .info-column .news-item-title {
+            color: #007bff; /* 新闻标题也是蓝色 */
+        }
+
+
+        /* 暗黑模式 */
+        body.dark-mode {
+            background-color: #1e1e2f; /* 深蓝紫色背景 */
+            color: #e0e0e0; /* 浅灰色文字 */
+        }
+
+        body.dark-mode .header {
+            border-bottom: 2px solid #3a3a5a; /* 深色分割线 */
+        }
+
+        body.dark-mode .current-time {
+            color: #b0b0b0;
+        }
+
+        body.dark-mode .search-section,
+        body.dark-mode .info-column,
+        body.dark-mode .analysis-section {
+            background-color: #2c2c44; /* 深色卡片背景 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        body.dark-mode .search-section input[type="text"] {
+            background-color: #3a3a5a;
+            border-color: #555;
+            color: #e0e0e0;
+        }
+        body.dark-mode .search-section input[type="text"]:focus {
+            border-color: #cc0000; /* 红色焦点边框 (暗黑模式下的主色调) */
+        }
+
+
+        body.dark-mode .search-section button {
+            background-color: #cc0000; /* 主要红色 (暗黑模式下的主色调) */
+        }
+        body.dark-mode .search-section button:hover {
+            background-color: #a30000; /* 深红色悬停 */
+        }
+
+        body.dark-mode .info-column h2 {
+            color: #e0e0e0;
+            border-bottom: 2px solid #cc0000; /* 红色标题下划线 */
+        }
+        body.dark-mode .info-column .news-item {
+             border-bottom: 1px dashed #444;
+        }
+        body.dark-mode .info-column .news-item-title {
+            color: #ff4d4d; /* 亮红色链接 */
+        }
+        body.dark-mode .info-column .news-item-source {
+            color: #999;
+        }
+
+
+        body.dark-mode .analysis-section h2 {
+            color: #e0e0e0;
+        }
+
+        body.dark-mode .sentiment-percentage {
+            color: #cc0000; /* 红色百分比 */
+        }
+        body.dark-mode .sentiment-percentage .positive {
+            color: #33cc33; /* 亮绿色 */
+        }
+        body.dark-mode .sentiment-percentage .negative {
+            color: #ff6666; /* 亮红色 */
+        }
+
+        body.dark-mode .suggestions {
+            color: #c0c0c0;
+            background-color: #3a3a5a; /* 深色建议背景 */
+            border-left: 5px solid #cc0000; /* 红色左边框 */
+        }
+
+        /* 主线条 - 红色 (亮色模式下不明显，暗色模式下突出) */
+        /* 在亮色模式下，红色主要通过文字或特定边框体现，避免大面积使用导致刺眼 */
+        /* 在暗色模式下，红色作为强调色更加突出 */
+
+        /* 色块 - 蓝色 (亮色模式下的主导行动色) */
+        /* 在暗色模式下，蓝色被红色替代作为主导行动色 */
+
+        /* 切换开关样式 (简单的checkbox模拟) */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px; /* 宽度调整 */
+            height: 24px; /* 高度调整 */
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px; /* 圆角 */
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px; /* 滑块大小 */
+            width: 18px;  /* 滑块大小 */
+            left: 3px;   /* 位置调整 */
+            bottom: 3px; /* 位置调整 */
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff; /* 亮色模式下切换器激活颜色 */
+        }
+
+        body.dark-mode input:checked + .slider {
+            background-color: #cc0000; /* 暗色模式下切换器激活颜色 */
+        }
+
+        input:focus + .slider {
+            box-shadow: 0 0 1px #2196F3;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px); /* 滑动距离 */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="current-time" id="current-time-display">
+                </div>
+            <div class="theme-switcher">
+                <label for="theme-toggle">暗黑模式</label>
+                <label class="switch">
+                    <input type="checkbox" id="theme-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </header>
+
+        <section class="search-section">
+            <input type="text" id="keyword-input" placeholder="请输入需要查询的关键词...">
+            <button onclick="searchKeyword()">查询</button>
+            </section>
+
+        <section class="info-section">
+            <div class="info-column" id="positive-info">
+                <h2>正面信息</h2>
+                <div class="news-item">
+                    <a href="#" target="_blank" class="news-item-title">[示例] 公司新产品广受好评，市场前景乐观</a>
+                    <p class="news-item-source">来源：XX新闻 - 2025-05-10</p>
+                </div>
+                <div class="news-item">
+                    <a href="#" target="_blank" class="news-item-title">[示例] 用户对品牌服务表示高度满意</a>
+                    <p class="news-item-source">来源：社交媒体平台Y - 2025-05-09</p>
+                </div>
+                </div>
+            <div class="info-column" id="negative-info">
+                <h2>负面信息</h2>
+                <div class="news-item">
+                    <a href="#" target="_blank" class="news-item-title">[示例] 部分用户反馈产品存在bug，需紧急修复</a>
+                    <p class="news-item-source">来源：技术论坛Z - 2025-05-10</p>
+                </div>
+                <div class="news-item">
+                    <a href="#" target="_blank" class="news-item-title">[示例] 供应链出现短暂中断，影响部分地区供货</a>
+                    <p class="news-item-source">来源：行业报告Q - 2025-05-08</p>
+                </div>
+                </div>
+        </section>
+
+        <section class="analysis-section">
+            <h2>舆情状态分析</h2>
+            <div class="sentiment-percentage" id="sentiment-analysis-result">
+                舆情分析中...
+            </div>
+            <h2>舆情建议</h2>
+            <div class="suggestions" id="ai-suggestions">
+                请先输入关键词进行查询以获取舆情分析和建议。
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        // --- 时间显示 ---
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+            document.getElementById('current-time-display').textContent = `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
+        }
+        // 立即更新时间，并每秒刷新一次
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // --- 主题切换 ---
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // 检查本地存储中是否有主题偏好
+        const currentTheme = localStorage.getItem('theme');
+        if (currentTheme) {
+            body.classList.add(currentTheme);
+            if (currentTheme === 'dark-mode') {
+                themeToggle.checked = true;
+            }
+        }
+
+        themeToggle.addEventListener('change', function() {
+            if (this.checked) {
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark-mode');
+            } else {
+                body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light-mode'); // 或者直接移除 'dark-mode'
+            }
+        });
+
+        // --- 关键词查询 (前端占位函数) ---
+        function searchKeyword() {
+            const keyword = document.getElementById('keyword-input').value;
+            if (!keyword.trim()) {
+                alert('请输入关键词！');
+                return;
+            }
+
+            console.log(`准备查询关键词: ${keyword}`);
+            // 【后端对接点】
+            // 1. 显示加载状态 (可选)
+            document.getElementById('positive-info').innerHTML = '<h2>正面信息</h2><p>正在加载...</p>';
+            document.getElementById('negative-info').innerHTML = '<h2>负面信息</h2><p>正在加载...</p>';
+            document.getElementById('sentiment-analysis-result').textContent = '舆情分析中...';
+            document.getElementById('ai-suggestions').textContent = '正在生成建议...';
+
+            // 2. 发起API请求到后端
+            // 示例: fetch(`/api/sentiment-analysis?keyword=${encodeURIComponent(keyword)}`)
+            //          .then(response => response.json())
+            //          .then(data => {
+            //              updatePositiveInfo(data.positive_news);
+            //              updateNegativeInfo(data.negative_news);
+            //              updateSentimentAnalysis(data.sentiment_percentage);
+            //              updateAiSuggestions(data.suggestions);
+            //          })
+            //          .catch(error => {
+            //              console.error('查询失败:', error);
+            //              alert('查询失败，请稍后再试。');
+            //              // 恢复初始提示
+            //                document.getElementById('positive-info').innerHTML = '<h2>正面信息</h2><p>暂无数据</p>';
+            //                document.getElementById('negative-info').innerHTML = '<h2>负面信息</h2><p>暂无数据</p>';
+            //                document.getElementById('sentiment-analysis-result').textContent = '请输入关键词查询';
+            //                document.getElementById('ai-suggestions').textContent = '请输入关键词查询';
+            //          });
+
+            // 【以下为模拟数据显示，实际应由后端返回数据后调用相应函数更新】
+            // 此处仅为演示，实际应用中这些数据会从后端获取
+            setTimeout(() => { // 模拟网络延迟
+                const mockPositiveData = [
+                    { title: `关于"${keyword}"的正面报道一`, source: "XX新闻", date: "2025-05-10", url: "#" },
+                    { title: `"${keyword}"受到用户喜爱`, source: "社交平台A", date: "2025-05-09", url: "#" }
+                ];
+                const mockNegativeData = [
+                    { title: `"${keyword}"引发的一些争议讨论`, source: "论坛B", date: "2025-05-10", url: "#" },
+                    { title: `警惕与"${keyword}"相关的风险`, source: "行业观察C", date: "2025-05-08", url: "#" }
+                ];
+                const mockSentiment = { positive: 65, negative: 35 }; // 假设正面65%，负面35%
+                const mockSuggestion = `针对 "${keyword}" 的当前舆情，建议加强正面宣传引导，并关注负面信息中提及的具体问题，及时采取相应措施。`;
+
+                updatePositiveInfo(mockPositiveData);
+                updateNegativeInfo(mockNegativeData);
+                updateSentimentAnalysis(mockSentiment);
+                updateAiSuggestions(mockSuggestion);
+            }, 1500);
+        }
+
+        // --- 更新正面信息区域 (后端对接点) ---
+        function updatePositiveInfo(newsArray) {
+            const positiveInfoDiv = document.getElementById('positive-info');
+            positiveInfoDiv.innerHTML = '<h2>正面信息</h2>'; // 清空旧内容并重置标题
+            if (newsArray && newsArray.length > 0) {
+                newsArray.forEach(item => {
+                    const newsItemDiv = document.createElement('div');
+                    newsItemDiv.classList.add('news-item');
+                    newsItemDiv.innerHTML = `
+                        <a href="${item.url || '#'}" target="_blank" class="news-item-title">${item.title}</a>
+                        <p class="news-item-source">来源：${item.source || '未知'} - ${item.date || '日期未知'}</p>
+                    `;
+                    positiveInfoDiv.appendChild(newsItemDiv);
+                });
+            } else {
+                positiveInfoDiv.innerHTML += '<p>暂无相关正面信息。</p>';
+            }
+        }
+
+        // --- 更新负面信息区域 (后端对接点) ---
+        function updateNegativeInfo(newsArray) {
+            const negativeInfoDiv = document.getElementById('negative-info');
+            negativeInfoDiv.innerHTML = '<h2>负面信息</h2>'; // 清空旧内容并重置标题
+            if (newsArray && newsArray.length > 0) {
+                newsArray.forEach(item => {
+                    const newsItemDiv = document.createElement('div');
+                    newsItemDiv.classList.add('news-item');
+                    newsItemDiv.innerHTML = `
+                        <a href="${item.url || '#'}" target="_blank" class="news-item-title">${item.title}</a>
+                        <p class="news-item-source">来源：${item.source || '未知'} - ${item.date || '日期未知'}</p>
+                    `;
+                    negativeInfoDiv.appendChild(newsItemDiv);
+                });
+            } else {
+                negativeInfoDiv.innerHTML += '<p>暂无相关负面信息。</p>';
+            }
+        }
+
+        // --- 更新舆情状态百分比 (后端对接点) ---
+        function updateSentimentAnalysis(sentimentData) {
+            // sentimentData 结构示例: { positive: 75, negative: 25 } 或一个综合指数的文本
+            const sentimentResultDiv = document.getElementById('sentiment-analysis-result');
+            if (typeof sentimentData === 'object' && sentimentData !== null && 'positive' in sentimentData && 'negative' in sentimentData) {
+                sentimentResultDiv.innerHTML = `
+                    <span class="positive">正面：${sentimentData.positive}%</span> |
+                    <span class="negative">负面：${sentimentData.negative}%</span>
+                `;
+            } else if (typeof sentimentData === 'string') {
+                sentimentResultDiv.textContent = sentimentData;
+            } else {
+                sentimentResultDiv.textContent = '无法获取舆情状态';
+            }
+        }
+
+        // --- 更新AI建议 (后端对接点) ---
+        function updateAiSuggestions(suggestionText) {
+            const suggestionsDiv = document.getElementById('ai-suggestions');
+            suggestionsDiv.textContent = suggestionText || '暂无建议。';
+        }
+
+    </script>
+</body>
+</html>
